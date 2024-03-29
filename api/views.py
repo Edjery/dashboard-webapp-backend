@@ -17,6 +17,10 @@ from api.models import AuthenticatedUser, DashboardUser
 from api.pagination import DefaultPagination
 from api.serializers import AuthenticatedUserSerializer, DashboardUserSerializer
 
+AUTH_API_URL = 'http://127.0.0.1:8000/camera/'
+BASE_URL = 'http://localhost:6800/'
+AUTH_URL = f'${BASE_URL}api/auth/authenticate/'
+
 def generate_jwt_token(user_id, email, expiration_time_minutes = 30):
     expiration_time = datetime.now() + timedelta(minutes=expiration_time_minutes)
     payload = {'id': user_id, 'email': email, 'exp' : expiration_time}
@@ -61,7 +65,6 @@ class AuthenticatedUserViewSet(ModelViewSet):
     serializer_class = AuthenticatedUserSerializer
     pagination_class = DefaultPagination
     
-
 @api_view(['POST'])
 def login_user(request):
     if request.method == 'POST':
@@ -76,7 +79,18 @@ def login_user(request):
                 'email': user.email,
                 'name': user.name
             }
-            return Response({'message': 'User sign in successfully', 'token' : token, 'userData' : userData}, status=status.HTTP_201_CREATED)
+
+            exists = AuthenticatedUser.objects.filter(user=user).exists()
+            if exists:
+                auth_user = get_object_or_404(AuthenticatedUser, user=user)
+                if auth_user.status:
+                    email = user.email
+                    redirect_url = AUTH_URL
+
+                    redirect_url_with_params = f"{AUTH_API_URL}?email={email}&redirect_url={redirect_url}"
+                    return Response({'mode': 'auth', 'message': 'User sign in successfully', 'redirect_url' : redirect_url_with_params}, status=status.HTTP_200_OK)
+                        
+            return Response({'mode': 'signin', 'message': 'User sign in successfully', 'token' : token, 'userData' : userData}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
@@ -125,3 +139,4 @@ def authenticate_with_token(request):
         return Response({'message': 'User sign in successfully', 'token' : token, 'userData' : userData}, status=status.HTTP_201_CREATED)
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
