@@ -13,8 +13,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 
-from api.models import DashboardUser
-from api.serializers import DashboardUserSerializer
+from api.models import AuthenticatedUser, DashboardUser
+from api.pagination import DefaultPagination
+from api.serializers import AuthenticatedUserSerializer, DashboardUserSerializer
 
 def generate_jwt_token(user_id, email, expiration_time_minutes = 30):
     expiration_time = datetime.now() + timedelta(minutes=expiration_time_minutes)
@@ -55,6 +56,11 @@ class UsersViewSet(ModelViewSet):
             return Response({'message': 'User registered successfully', 'token': token, 'userData': userData}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class AuthenticatedUserViewSet(ModelViewSet): 
+    queryset = AuthenticatedUser.objects.all()
+    serializer_class = AuthenticatedUserSerializer
+    pagination_class = DefaultPagination
+    
 
 @api_view(['POST'])
 def login_user(request):

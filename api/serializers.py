@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import status
 
-from api.models import DashboardUser
+from api.models import AuthenticatedUser, DashboardUser
 
 class DashboardUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
@@ -29,4 +29,10 @@ class DashboardUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = DashboardUser
         fields = ['id', 'name', 'email', 'password',]
+
+
+class AuthenticatedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuthenticatedUser
+        fields = ['user', 'status']
 

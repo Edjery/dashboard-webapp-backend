@@ -8,7 +8,7 @@ class DashboardUser(models.Model):
     def __str__(self) -> str:
         return self.email
 
-class AuthenticatedUsers(models.Model):
+class AuthenticatedUser(models.Model):
     status = models.BooleanField(default=True)
     user = models.ForeignKey(DashboardUser, on_delete=models.CASCADE)
 
