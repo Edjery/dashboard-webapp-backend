@@ -1,3 +1,6 @@
 from django.contrib import admin
+from api.models import DashboardUser
 
-# Register your models here.
+@admin.register(DashboardUser)
+class DashboardUserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email', 'password')
