@@ -1,3 +1,7 @@
 pipenv shell
 pipenv install
 python manage.py runserver 0.0.0.0:6800
+
+superuser 
+mikasa
+mikasa@gmail.com
