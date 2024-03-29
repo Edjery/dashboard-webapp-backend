@@ -10,7 +10,7 @@ class DashboardUser(models.Model):
 
 class AuthenticatedUser(models.Model):
     status = models.BooleanField(default=True)
-    user = models.ForeignKey(DashboardUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(DashboardUser, on_delete=models.CASCADE, unique=True)
 
     def __str__(self) -> str:
         return self.user.name
