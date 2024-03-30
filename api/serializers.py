@@ -34,5 +34,5 @@ class DashboardUserSerializer(serializers.ModelSerializer):
 class AuthenticatedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuthenticatedUser
-        fields = ['user', 'status']
+        fields = ['id', 'user', 'status']
 
