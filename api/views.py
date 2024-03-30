@@ -17,9 +17,9 @@ from api.models import AuthenticatedUser, DashboardUser
 from api.pagination import DefaultPagination
 from api.serializers import AuthenticatedUserSerializer, DashboardUserSerializer
 
-AUTH_API_URL = 'http://127.0.0.1:8000/camera/'
+AUTH_API_URL = 'http://127.0.0.1:8000/api/authenticate'
 BASE_URL = 'http://localhost:6800/'
-AUTH_URL = f'${BASE_URL}api/auth/authenticate/'
+AUTH_URL = f'{BASE_URL}api/auth/authenticate/'
 
 def generate_jwt_token(user_id, email, expiration_time_minutes = 30):
     expiration_time = datetime.now() + timedelta(minutes=expiration_time_minutes)
@@ -64,7 +64,7 @@ class AuthenticatedUserViewSet(ModelViewSet):
     queryset = AuthenticatedUser.objects.all()
     serializer_class = AuthenticatedUserSerializer
     pagination_class = DefaultPagination
-    
+
 @api_view(['POST'])
 def login_user(request):
     if request.method == 'POST':
@@ -99,6 +99,7 @@ def login_user(request):
 client_code = 'secretcodexyz'
 front_end_url = 'http://localhost:2776/'
 token_url = f'{front_end_url}auth'
+error_url = f'{front_end_url}auth/error'
 
 @api_view(['GET'])
 def authenticate(request):
@@ -113,7 +114,7 @@ def authenticate(request):
             else:
                 return Response({'error': 'Invalid code or token'}, status=400)
         else:
-            return Response({'error': 'Both code and token are required'}, status=400)
+            return redirect(error_url)
     else:
         return Response({'error': 'Only GET method is allowed'}, status=405)
 
@@ -139,4 +140,17 @@ def authenticate_with_token(request):
         return Response({'message': 'User sign in successfully', 'token' : token, 'userData' : userData}, status=status.HTTP_201_CREATED)
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
+@api_view(['GET'])
+def get_auth_user(request, id):
+    if request.method == 'GET':
+        user = get_object_or_404(DashboardUser, id=id)
+        try:
+            auth_user = AuthenticatedUser.objects.get(user = user)
+            return Response({'message': 'Data got successfully', 'user_id' : auth_user.id}, status=status.HTTP_201_CREATED)
+
+        except AuthenticatedUser.DoesNotExist:
+            return Response({'error': 'User is not registered in two factor authentication'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
